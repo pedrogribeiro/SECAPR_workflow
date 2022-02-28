@@ -1,4 +1,4 @@
-## ASSEMBLY ##
+###################################### ASSEMBLY ######################################
 ## This is just an example for 1 individual (paired-end Illumina short-read sequencing)
 ## For the --input folder, files must be organized like this: (example)
 ## in_contig_assembly
@@ -6,6 +6,8 @@
 ##                      |01_clean
 ##                                |01_clean-READ1.fastq (this naming is essential for the correct functioning of SECAPR)
 ##                                |01_clean-READ2.fastq
+
+############ ABYSS ############
 
 #PBS -N abyss_k21_01
 #PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
@@ -27,8 +29,29 @@ source /storage/brno3-cerit/home/pedroribeiro/.bashrc
 conda activate secapr_env
 secapr assemble_reads --input /storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X/in_contig_assembly/01 --output /storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X/out_contig_assembly_abyss/kmer_21/01 --assembler abyss --kmer 21
 
+############ SPADES ############
 
-## EXTRACTION USING SECAPR ## - this extraction uses the SECAPR pipeline
+#PBS -N spades_01
+#PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
+#PBS -l walltime=47:59:00
+#PBS -o output_assembly_spades_01.txt
+#PBS -e error_assembly_spades_01.txt
+
+#clean scratch after the end
+trap 'clean_scratch' TERM EXIT
+
+# go to scratch directory
+cd $SCRATCHDIR || exit 1
+
+# SPADES uses system temporary directory instead of current directory
+# redirect TMPDIR to scratch directory
+export TMPDIR=$SCRATCHDIR
+
+source /storage/brno3-cerit/home/pedroribeiro/.bashrc
+conda activate secapr_env
+secapr assemble_reads --input /storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X/in_contig_assembly/01 --output /storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X/out_contig_assembly_spades/01 --assembler spades --kmer 21,33,55,77 --max_memory 200 --cores 1
+
+###################################### EXTRACTION USING SECAPR ###################################### - this extraction uses the SECAPR pipeline
 ## This step is only made once or twice per kmer size used for assembly on previous step (i.e you run this script once for kmer21), depending on the identity values you want (80 or 90 or both)
 ## This step uses the .fa files generated after assembly
 
@@ -53,7 +76,7 @@ conda activate secapr_env
 secapr find_target_contigs --contigs /storage/brno3-cerit/home/pedroribeiro/ME_subsample/in_extraction_abyss/kmer_21 --reference /storage/brno3-cerit/home/pedroribeiro/ME_subsample/reference_target_loci/All_loci_consensus_sequences_v2.fasta --output /storage/brno3-cerit/home/pedroribeiro/ME_subsample/out_extraction_abyss/kmer_21_id_80 --target_length 50 --min_identity 80
 
 
-## ALIGNMENT ##
+###################################### ALIGNMENT ######################################
 ## This is step is run once per kmer size (i.e for kmer 21).
 ## This step uses the extracted_contigs_all_samples.fasta file from the extraction step.
 
@@ -75,7 +98,7 @@ conda activate secapr_env
 secapr align_sequences --sequences /storage/brno3-cerit/home/pedroribeiro/ME_subsample/in_align_secapr_abyss/kmer_21_id_80/extracted_target_contigs_all_samples.fasta --output /storage/brno3-cerit/home/pedroribeiro/ME_subsample/out_align_secapr_abyss/kmer_21_id_80 --aligner mafft --output-format fasta --no-trim --cores 10
 
 
-## ALIGNMENT MAFFT ##
+###################################### ALIGNMENT MAFFT ######################################
 ## This step is used to trim the intronic regions using a curated reference from the genes you extracted in the extraction step.
 ## This step needs an external MAFFT installed in the cluster you are using, because it does not run with SECAPR's commands. 
 ## Before running this step, you need to change the names of the files generated during the alignment (SECAPPR's alignment) step using the rename_loci.sh script.
