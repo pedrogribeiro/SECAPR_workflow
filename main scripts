@@ -1,11 +1,11 @@
 ###################################### ASSEMBLY ######################################
 ## This is just an example for 1 individual (paired-end Illumina short-read sequencing)
 ## For the --input folder, files must be organized like this: (example)
-## in_contig_assembly
-##                  |01 (files must be organized with simple number combinations before start
-##                      |01_clean
-##                                |01_clean-READ1.fastq (this naming is essential for the correct functioning of SECAPR)
-##                                |01_clean-READ2.fastq
+## directory_containing_reads_folders
+##                                   |01 (files must be organized with simple number combinations before start
+##                                      |01_clean
+##                                               |01_clean-READ1.fastq (this naming is essential for the correct functioning of SECAPR)
+##                                               |01_clean-READ2.fastq
 
 ############ ABYSS ############
 
