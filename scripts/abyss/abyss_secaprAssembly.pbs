@@ -1,0 +1,63 @@
+#!/bin/bash
+# Purpose: assemble cleaned paired-end reads with SECAPR using ABySS for multiple samples via a PBS array.
+# Note: this is an HPC/PBS example and paths should be adapted to the local system.
+
+# ===== PBS settings =====
+#PBS -N abyss_k21
+#PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
+#PBS -l walltime=23:59:00
+#PBS -o /storage/brno3-cerit/home/pedroribeiro/scripts/secapr/abyss_k21_^array_index^.out
+#PBS -e /storage/brno3-cerit/home/pedroribeiro/scripts/secapr/abyss_k21_^array_index^.err
+#PBS -J 1-10
+
+######### Define your variables #########
+PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X"
+LIST="${PROJECT_DIR}/samplesList.txt"
+
+INPUT_BASE="${PROJECT_DIR}/in_contig_assembly"
+OUTPUT_BASE="${PROJECT_DIR}/out_contig_assembly_abyss/kmer_21"
+
+BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
+SECAPR_ENV="/storage/brno3-cerit/home/pedroribeiro/software/secapr_env"
+KMER="21"
+
+######### Notes #########
+# Expected SECAPR input structure:
+# in_contig_assembly/
+# └── 01/
+#     └── 01_clean/
+#         ├── 01_clean-READ1.fastq
+#         └── 01_clean-READ2.fastq
+#
+# Each line in samplesList.txt should contain one sample ID, for example:
+# 01
+# 02
+# 03
+
+######### System specific definitions #########
+trap 'clean_scratch' TERM EXIT
+
+cd "$SCRATCHDIR" || exit 1
+
+export TMPDIR="$SCRATCHDIR"
+
+######### Load required envs #########
+source "$BASHRC"
+mamba activate "$SECAPR_ENV"
+
+######### Get the sample name for this array task #########
+sample="$(sed -n "${PBS_ARRAY_INDEX}p" "${LIST}")"
+
+INPUT_DIR="${INPUT_BASE}/${sample}"
+OUTPUT_DIR="${OUTPUT_BASE}/${sample}"
+
+echo "Running sample: ${sample}"
+echo "Input: ${INPUT_DIR}"
+echo "Output: ${OUTPUT_DIR}"
+
+######### Run SECAPR assembly with ABySS #########
+secapr assemble_reads \
+  --input "$INPUT_DIR" \
+  --output "$OUTPUT_DIR" \
+  --assembler abyss \
+  --kmer "$KMER"
