@@ -10,7 +10,7 @@
 #PBS -e /storage/brno3-cerit/home/pedroribeiro/scripts/secapr/abyss_k21_^array_index^.err
 #PBS -J 1-10
 
-######### Define your variables #########
+##### define your variables #####
 PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X"
 LIST="${PROJECT_DIR}/samplesList.txt"
 
@@ -21,7 +21,7 @@ BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
 SECAPR_ENV="/storage/brno3-cerit/home/pedroribeiro/software/secapr_env"
 KMER="21"
 
-######### Notes #########
+##### some useful notes #####
 # Expected SECAPR input structure:
 # in_contig_assembly/
 # └── 01/
@@ -34,18 +34,18 @@ KMER="21"
 # 02
 # 03
 
-######### System specific definitions #########
+##### system specific definitions #####
 trap 'clean_scratch' TERM EXIT
 
 cd "$SCRATCHDIR" || exit 1
 
 export TMPDIR="$SCRATCHDIR"
 
-######### Load required envs #########
+##### load required envs #####
 source "$BASHRC"
 mamba activate "$SECAPR_ENV"
 
-######### Get the sample name for this array task #########
+##### get the sample name for this array task #####
 sample="$(sed -n "${PBS_ARRAY_INDEX}p" "${LIST}")"
 
 INPUT_DIR="${INPUT_BASE}/${sample}"
@@ -55,7 +55,7 @@ echo "Running sample: ${sample}"
 echo "Input: ${INPUT_DIR}"
 echo "Output: ${OUTPUT_DIR}"
 
-######### Run SECAPR assembly with ABySS #########
+##### run SECAPR assembly with ABySS #####
 secapr assemble_reads \
   --input "$INPUT_DIR" \
   --output "$OUTPUT_DIR" \
