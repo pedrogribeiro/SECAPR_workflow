@@ -2,7 +2,7 @@
 # Purpose: assemble cleaned paired-end reads with SECAPR using ABySS for multiple samples via a PBS array.
 # Note: this is an HPC/PBS example and paths should be adapted to the local system.
 
-# ===== PBS settings =====
+##### PBS settings #####
 #PBS -N abyss_k21
 #PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
 #PBS -l walltime=23:59:00
