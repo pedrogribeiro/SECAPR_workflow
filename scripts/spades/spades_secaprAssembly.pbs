@@ -19,8 +19,8 @@
 #PBS -N spades_multi_kmer
 #PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
 #PBS -l walltime=47:59:00
-#PBS -o spades_multi_kmer_^array_index^.out
-#PBS -e spades_multi_kmer_^array_index^.err
+#PBS -o spades_multi_kmer_^array_index^.txt
+#PBS -e spades_multi_kmer_^array_index^.txt
 #PBS -J 1-10
 
 ##### define variables #####
