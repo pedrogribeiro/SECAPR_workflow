@@ -8,8 +8,8 @@
 #PBS -N extract_abyss_k21_id80
 #PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
 #PBS -l walltime=23:59:00
-#PBS -o extract_abyss_k21_id80.out
-#PBS -e extract_abyss_k21_id80.err
+#PBS -o extract_abyss_k21_id80.txt
+#PBS -e extract_abyss_k21_id80.txt
 
 ##### define variables #####
 PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample"
