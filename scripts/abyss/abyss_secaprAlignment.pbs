@@ -1,0 +1,40 @@
+#!/bin/bash
+# Purpose: align extracted target contigs with SECAPR for the ABySS branch.
+# Note: this step is run once per k-mer size.
+# Note: this script uses the extracted_target_contigs_all_samples.fasta file generated in the extraction step.
+# Note: this is an HPC/PBS example and paths should be adapted to the local system.
+
+##### define pbs settings #####
+#PBS -N align_abyss_k21_id80
+#PBS -l select=1:ncpus=10:mem=48gb:scratch_local=100gb
+#PBS -l walltime=23:59:00
+#PBS -o align_abyss_k21_id80.out
+#PBS -e align_abyss_k21_id80.err
+
+##### define variables #####
+PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample"
+SEQUENCES="${PROJECT_DIR}/in_align_secapr_abyss/kmer_21/extracted_target_contigs_all_samples.fasta"
+OUTPUT_DIR="${PROJECT_DIR}/out_align_secapr_abyss/kmer_21"
+
+BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
+CONDA_ENV="secapr_env"
+
+ALIGNER="mafft"
+CORES="10"
+
+##### system specific definitions #####
+trap 'clean_scratch' TERM EXIT
+cd "$SCRATCHDIR" || exit 1
+export TMPDIR="$SCRATCHDIR"
+
+##### activate environment #####
+source "$BASHRC"
+mamba activate "$CONDA_ENV"
+
+##### run secapr sequence alignment #####
+secapr align_sequences \
+  --sequences "$SEQUENCES" \
+  --output "$OUTPUT_DIR" \
+  --aligner "$ALIGNER" \
+  --no_trim \
+  --cores "$CORES"
