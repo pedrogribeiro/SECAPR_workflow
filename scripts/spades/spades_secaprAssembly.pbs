@@ -44,7 +44,7 @@ export TMPDIR="$SCRATCHDIR"
 
 ##### activate environment #####
 source "$BASHRC"
-conda activate "$CONDA_ENV"
+mamba activate "$CONDA_ENV"
 
 ##### define sample from array index #####
 sample="$(sed -n "${PBS_ARRAY_INDEX}p" "${LIST}")"
