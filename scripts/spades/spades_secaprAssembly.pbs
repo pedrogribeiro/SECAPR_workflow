@@ -1,0 +1,62 @@
+#!/bin/bash
+# Purpose: assemble cleaned paired-end reads with SECAPR using SPAdes for multiple samples via a PBS array.
+# Note: this is an HPC/PBS example and paths should be adapted to the local system.
+
+######### Notes #########
+# Expected SECAPR input structure:
+# in_contig_assembly/
+# └── 01/
+#     └── 01_clean/
+#         ├── 01_clean-READ1.fastq
+#         └── 01_clean-READ2.fastq
+#
+# Each line in samplesList.txt should contain one sample ID, for example:
+# 01
+# 02
+# 03
+
+##### define pbs settings #####
+#PBS -N spades_multi_kmer
+#PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
+#PBS -l walltime=47:59:00
+#PBS -o spades_multi_kmer_^array_index^.out
+#PBS -e spades_multi_kmer_^array_index^.err
+#PBS -J 1-10
+
+##### define variables #####
+PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample_5X"
+LIST="${PROJECT_DIR}/samplesList.txt"
+
+INPUT_BASE="${PROJECT_DIR}/in_contig_assembly"
+OUTPUT_BASE="${PROJECT_DIR}/out_contig_assembly_spades"
+
+BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
+CONDA_ENV="secapr_env"
+
+KMER_SERIES="21,33,55,77"
+MAX_MEMORY="200"
+CORES="1"
+
+##### system specific definitions #####
+trap 'clean_scratch' TERM EXIT
+cd "$SCRATCHDIR" || exit 1
+export TMPDIR="$SCRATCHDIR"
+
+##### activate environment #####
+source "$BASHRC"
+conda activate "$CONDA_ENV"
+
+##### define sample from array index #####
+sample="$(sed -n "${PBS_ARRAY_INDEX}p" "${LIST}")"
+
+INPUT_DIR="${INPUT_BASE}/${sample}"
+OUTPUT_DIR="${OUTPUT_BASE}/${sample}"
+
+##### run secapr spades assembly #####
+secapr assemble_reads \
+  --input "$INPUT_DIR" \
+  --output "$OUTPUT_DIR" \
+  --assembler spades \
+  --kmer "$KMER_SERIES" \
+  --max_memory "$MAX_MEMORY" \
+  --cores "$CORES"
