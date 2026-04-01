@@ -1,0 +1,48 @@
+#!/bin/bash
+# Purpose: identify and extract target contigs from ABySS assemblies using SECAPR.
+# Note: this script processes a directory containing all assembled contig files for all samples.
+# Note: this is an HPC/PBS example and paths should be adapted to the local system.
+
+
+##### define pbs settings #####
+#PBS -N extract_abyss_k21_id80
+#PBS -l select=1:ncpus=1:mem=200gb:scratch_local=300gb
+#PBS -l walltime=23:59:00
+#PBS -o extract_abyss_k21_id80.out
+#PBS -e extract_abyss_k21_id80.err
+
+##### define variables #####
+PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample"
+CONTIGS_DIR="${PROJECT_DIR}/in_extraction_abyss/kmer_21"
+REFERENCE_FASTA="${PROJECT_DIR}/reference_target_loci/All_loci_consensus_sequences_v2.fasta"
+OUTPUT_DIR="${PROJECT_DIR}/out_extraction_abyss/kmer_21_id_80"
+
+BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
+CONDA_ENV="secapr_env"
+
+TARGET_LENGTH="50"
+MIN_IDENTITY="80"
+
+##### system specific definitions #####
+trap 'clean_scratch' TERM EXIT
+cd "$SCRATCHDIR" || exit 1
+export TMPDIR="$SCRATCHDIR"
+
+##### activate environment #####
+source "$BASHRC"
+mamba activate "$CONDA_ENV"
+
+##### report run settings #####
+echo "Contigs directory: ${CONTIGS_DIR}"
+echo "Reference: ${REFERENCE_FASTA}"
+echo "Output: ${OUTPUT_DIR}"
+echo "Minimum identity: ${MIN_IDENTITY}"
+echo "Target length cutoff: ${TARGET_LENGTH}"
+
+##### run secapr target-contig extraction #####
+secapr find_target_contigs \
+  --contigs "$CONTIGS_DIR" \
+  --reference "$REFERENCE_FASTA" \
+  --output "$OUTPUT_DIR" \
+  --target_length "$TARGET_LENGTH" \
+  --min_identity "$MIN_IDENTITY"
