@@ -9,8 +9,8 @@
 #PBS -N mafft_abyss_k21_id80
 #PBS -l select=1:ncpus=8:mem=10gb:scratch_local=100gb
 #PBS -l walltime=23:59:00
-#PBS -o mafft_abyss_k21_id80.out
-#PBS -e mafft_abyss_k21_id80.err
+#PBS -o mafft_abyss_k21_id80.txt
+#PBS -e mafft_abyss_k21_id80.txt
 
 ##### define variables #####
 PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample"
