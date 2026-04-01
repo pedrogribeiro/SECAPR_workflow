@@ -1,0 +1,45 @@
+#!/bin/bash
+# Purpose: align SECAPR-extracted loci against curated per-locus references with MAFFT for the SPAdes branch.
+# Note: this step is used to trim intronic regions using curated reference sequences corresponding to the extracted loci.
+# Note: MAFFT is run outside SECAPR and must be available on the HPC system.
+# Note IMPORTANT: before running this script, rename SECAPR alignment output files with the rename_loci.sh helper script.
+# Note: this is an HPC/PBS example and paths should be adapted to the local system.
+
+##### define pbs settings #####
+#PBS -N mafft_spades_id80
+#PBS -l select=1:ncpus=8:mem=10gb:scratch_local=100gb
+#PBS -l walltime=23:59:00
+#PBS -o mafft_spades_id80.txt
+#PBS -e mafft_spades_id80.txt
+
+##### define variables #####
+PROJECT_DIR="/storage/brno3-cerit/home/pedroribeiro/ME_subsample"
+
+REFERENCE_DIR="${PROJECT_DIR}/reference_loci_fasta"
+INPUT_DIR="${PROJECT_DIR}/in_align_mafft_spades/id_80"
+OUTPUT_DIR="${PROJECT_DIR}/out_align_mafft_spades/id_80"
+
+BASHRC="/storage/brno3-cerit/home/pedroribeiro/.bashrc"
+MAFFT_MODULE="mafft-7.453"
+THREADS="8"
+
+##### system specific definitions #####
+trap 'clean_scratch' TERM EXIT
+cd "$SCRATCHDIR" || exit 1
+export TMPDIR="$SCRATCHDIR"
+
+##### activate environment #####
+source "$BASHRC"
+module add "$MAFFT_MODULE"
+
+##### prepare input files in scratch #####
+cp "${REFERENCE_DIR}"/*.fasta .
+
+##### run mafft locus alignments #####
+for file in *.fasta; do
+    mafft \
+      --addfull "${INPUT_DIR}/${file}" \
+      --thread "$THREADS" \
+      --keeplength "${REFERENCE_DIR}/${file}" \
+      > "${OUTPUT_DIR}/${file}"
+done
