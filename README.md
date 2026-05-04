@@ -66,7 +66,10 @@ Each one containing the relevant script. Since **spades** and **abyss** correspo
 The workflow expects you or your cluster to have these programs installed.
 SECAPR itself can be used installed with mambaforge or other conda manager. I simply install it as a conda env with:
 
+```
 mamba create -p path/to/yourLocal/software/secaprDir -c bioconda secapr
+```
+
 
 SECAPR (conda)
 MAFFT
